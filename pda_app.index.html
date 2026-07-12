@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>[PDA App] Installation Management</title>
+<style>
+:root{
+  --blue:#2f6fed; --border:#e6e8ec; --text:#1c2230; --text-muted:#6b7280; --bg:#f4f5f7;
+  --green:#1a9c5a; --red:#e0332b; --amber:#e07b00; --orange:#f0521c;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#e9ebf0;color:var(--text);font-size:14px;
+  display:flex;align-items:flex-start;justify-content:center;gap:40px;padding:40px;flex-wrap:wrap;}
+
+.phone{width:375px;height:780px;background:#000;border-radius:44px;padding:14px;box-shadow:0 30px 60px rgba(0,0,0,.25);}
+.screen{width:100%;height:100%;background:#fff;border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:10;}
+.statusbar{height:44px;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-size:12px;font-weight:600;}
+
+.app-bar{background:var(--orange);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.app-bar .back{font-size:18px;cursor:pointer;}
+.app-bar .title{font-size:15px;font-weight:700;}
+
+.app-body{flex:1;overflow-y:auto;background:var(--bg);}
+.view{display:none;height:100%;flex-direction:column;}
+.view.active{display:flex;}
+
+/* To-do list */
+.todo-tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);}
+.todo-tab{flex:1;text-align:center;padding:12px 0;font-size:13px;font-weight:700;color:var(--text-muted);border-bottom:2px solid transparent;}
+.todo-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.todo-list{padding:14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.task-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;}
+.task-card .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.task-card .instn{font-weight:700;font-size:13.5px;}
+.task-card .pill{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;background:#fff3ea;color:var(--orange);}
+.task-card .buyer{font-size:13px;font-weight:600;margin-bottom:2px;}
+.task-card .addr{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+.task-card .prod{display:flex;gap:8px;font-size:12px;color:var(--text-muted);}
+.task-card .prod b{color:var(--text);font-weight:600;}
+
+/* Detail page */
+.detail-body{padding:16px;overflow-y:auto;flex:1;}
+.detail-card{background:#fff;border-radius:12px;padding:16px;border:1px solid var(--border);}
+.detail-row{margin-bottom:14px;}
+.detail-row label{display:block;font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
+.detail-row .v{font-size:14.5px;font-weight:600;}
+.phone-btn{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:#eef4ff;color:var(--blue);padding:6px 12px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;}
+.big-btn{width:100%;padding:14px;border-radius:10px;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-top:10px;}
+.btn-start{background:var(--orange);color:#fff;}
+.btn-installed{background:var(--green);color:#fff;}
+.btn-onhold{background:#fff;color:var(--amber);border:1.5px solid var(--amber);}
+.btn-row{display:flex;gap:10px;}
+.btn-row .big-btn{margin-top:0;}
+
+/* phone popup */
+.sheet-overlay{position:absolute;inset:0;background:rgba(20,24,34,.45);display:none;align-items:flex-end;z-index:20;}
+.sheet-overlay.show{display:flex;}
+.sheet{background:#fff;width:100%;border-radius:20px 20px 0 0;padding:22px 20px 26px;}
+.sheet h4{margin:0 0 4px;font-size:15px;}
+.sheet .phone-num{font-size:20px;font-weight:700;text-align:center;margin:18px 0;}
+.sheet-actions{display:flex;gap:12px;}
+.sheet-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;border:none;font-size:14px;}
+.sheet-cancel{background:#f1f2f4;color:var(--text);}
+.sheet-call{background:var(--green);color:#fff;}
+
+/* Proof of Installation form */
+.form-body{padding:16px;overflow-y:auto;flex:1;}
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;}
+.form-field .req{color:var(--red);}
+.form-field select, .form-field textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;}
+.photo-row{display:flex;gap:10px;}
+.photo-slot{width:78px;height:78px;border-radius:10px;border:1.5px dashed #cfd3de;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#a2a7b5;font-size:20px;cursor:pointer;}
+.photo-slot.filled{border-style:solid;background:#eceff3 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="%23a2a7b5"><path d="M3 5h18v14H3z" fill="none" stroke="%23a2a7b5" stroke-width="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-4 4-3-3-6 6" stroke="%23a2a7b5" stroke-width="1.5" fill="none"/></svg>') center/28px no-repeat;color:transparent;}
+.hint{font-size:11px;color:var(--text-muted);margin-top:6px;}
+
+/* Complete screen */
+.complete-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;}
+.complete-wrap .check{width:70px;height:70px;border-radius:50%;background:#e5f7ec;color:var(--green);font-size:36px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.complete-wrap h3{margin:0 0 6px;font-size:17px;}
+.complete-wrap p{margin:0;color:var(--text-muted);font-size:13px;}
+
+.bottom-nav{display:flex;border-top:1px solid var(--border);background:#fff;flex-shrink:0;}
+.bottom-nav .item{flex:1;text-align:center;padding:10px 0 16px;font-size:11px;color:var(--text-muted);}
+.bottom-nav .item.active{color:var(--orange);font-weight:700;}
+.bottom-nav .ic{font-size:18px;display:block;margin-bottom:2px;}
+
+.side-panel{width:340px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px 24px;font-size:13px;color:var(--text-muted);}
+.side-panel h3{margin:0 0 12px;font-size:15px;color:var(--text);}
+.side-panel .step{display:flex;gap:10px;margin-bottom:14px;}
+.side-panel .num{width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.side-panel b{color:var(--text);}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>●●● 🔋</span></div>
+
+    <!-- ============ VIEW 1: TO-DO LIST ============ -->
+    <div class="view active" id="view-list">
+      <div class="app-bar"><span class="title" style="margin:0 auto;">Installation Management</span></div>
+      <div class="todo-tabs">
+        <div class="todo-tab active">To-do</div>
+        <div class="todo-tab">History</div>
+      </div>
+      <div class="app-body">
+        <div class="todo-list">
+          <div class="task-card" onclick="goTo('view-detail')">
+            <div class="top-row"><span class="instn">INST-20260712-0044</span><span class="pill">To start</span></div>
+            <div class="buyer">Nguyen Van A</div>
+            <div class="addr">123 Le Loi, Quan 1, HCMC</div>
+            <div class="prod"><span>📦 <b>Washing Machine</b></span></div>
+          </div>
+          <div class="task-card">
+            <div class="top-row"><span class="instn">INST-20260712-0045</span><span class="pill">To start</span></div>
+            <div class="buyer">Tran Thi B</div>
+            <div class="addr">45 Bach Dang, Da Nang</div>
+            <div class="prod"><span>📦 <b>Air Conditioner</b></span></div>
+          </div>
+          <div class="task-card">
+            <div class="top-row"><span class="instn">INST-20260712-0046</span><span class="pill">To start</span></div>
+            <div class="buyer">Le Van C</div>
+            <div class="addr">9 Kim Ma, Hanoi</div>
+            <div class="prod"><span>📦 <b>Water Heater</b></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="item active"><span class="ic">✅</span>To-do</div>
+        <div class="item"><span class="ic">🗂</span>History</div>
+        <div class="item"><span class="ic">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 2: DETAIL INFO (before start) ============ -->
+    <div class="view" id="view-detail">
+      <div class="app-bar"><span class="back" onclick="goTo('view-list')">←</span><span class="title">Installation detail info</span></div>
+      <div class="detail-body">
+        <div class="detail-card">
+          <div class="detail-row"><label>Installation TN</label><div class="v">INST-20260712-0044</div></div>
+          <div class="detail-row"><label>Buyer Name</label><div class="v">Nguyen Van A</div></div>
+          <div class="detail-row"><label>Buyer Address</label><div class="v">123 Le Loi, Quan 1, HCMC</div></div>
+          <div class="detail-row"><label>Product Name</label><div class="v">Panasonic Washing Machine NA-128XT</div></div>
+          <div class="detail-row"><label>Product Category</label><div class="v">Washing Machine</div></div>
+        </div>
+        <button class="big-btn btn-start" onclick="goTo('view-detail-started')">Start task</button>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 3: DETAIL INFO (after start) ============ -->
+    <div class="view" id="view-detail-started">
+      <div class="app-bar"><span class="back" onclick="goTo('view-list')">←</span><span class="title">Installation detail info</span></div>
+      <div class="detail-body">
+        <div class="detail-card">
+          <div class="detail-row"><label>Installation TN</label><div class="v">INST-20260712-0044</div></div>
+          <div class="detail-row"><label>Buyer Name</label><div class="v">Nguyen Van A</div></div>
+          <div class="detail-row">
+            <label>Buyer Address</label>
+            <div class="v">123 Le Loi, Quan 1, HCMC</div>
+            <button class="phone-btn" onclick="showSheet()">📞 Call buyer</button>
+          </div>
+          <div class="detail-row"><label>Product Name</label><div class="v">Panasonic Washing Machine NA-128XT</div></div>
+          <div class="detail-row"><label>Product Category</label><div class="v">Washing Machine</div></div>
+          <div class="detail-row"><label>Status</label><div class="v" style="color:var(--blue);">In_Transit</div></div>
+        </div>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="big-btn btn-installed" onclick="goTo('view-installed-form')">Installed</button>
+          <button class="big-btn btn-onhold" onclick="goTo('view-onhold-form')">Onhold</button>
+        </div>
+      </div>
+
+      <div class="sheet-overlay" id="callSheet">
+        <div class="sheet">
+          <h4>Call Buyer</h4>
+          <div class="phone-num">090 123 4567</div>
+          <div class="sheet-actions">
+            <button class="sheet-cancel" onclick="hideSheet()">Cancel</button>
+            <button class="sheet-call" onclick="hideSheet()">Call</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 4: PROOF OF INSTALLATION (Installed) ============ -->
+    <div class="view" id="view-installed-form">
+      <div class="app-bar"><span class="back" onclick="goTo('view-detail-started')">←</span><span class="title">Proof of Installation</span></div>
+      <div class="form-body">
+        <div class="form-field">
+          <label>Photo <span class="req">* required, min 1 / max 3</span></label>
+          <div class="photo-row">
+            <div class="photo-slot filled"></div>
+            <div class="photo-slot filled"></div>
+            <div class="photo-slot">+</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Remark <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+          <textarea rows="3" placeholder="Add a note...">Installed successfully, buyer confirmed and satisfied.</textarea>
+        </div>
+        <button class="big-btn btn-installed" onclick="goTo('view-complete')">Confirm</button>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 5: PROOF OF INSTALLATION ONHOLD ============ -->
+    <div class="view" id="view-onhold-form">
+      <div class="app-bar"><span class="back" onclick="goTo('view-detail-started')">←</span><span class="title">Proof of Installation Onhold</span></div>
+      <div class="form-body">
+        <div class="form-field">
+          <label>Onhold reason <span class="req">*</span></label>
+          <select>
+            <option>Buyer not available at address</option>
+            <option>Buyer requested reschedule</option>
+            <option>Missing installation accessories</option>
+            <option>Site not ready for installation</option>
+            <option>Product defect found on-site</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Photo <span class="req">* required, min 1 / max 3</span></label>
+          <div class="photo-row">
+            <div class="photo-slot filled"></div>
+            <div class="photo-slot">+</div>
+            <div class="photo-slot">+</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Remark <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+          <textarea rows="3" placeholder="Add a note..."></textarea>
+        </div>
+        <div class="hint">Confirm syncs status &amp; proof to FMS / Agency Portal. Final status depends on attempt number, reason type, remaining attempts and whether Installer is at buyer's house — see status-flow table.</div>
+        <button class="big-btn btn-onhold" style="background:var(--amber);color:#fff;border:none;" onclick="goTo('view-onhold-complete')">Confirm</button>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 6: COMPLETE (Installed) ============ -->
+    <div class="view" id="view-complete">
+      <div class="app-bar"><span class="title" style="margin:0 auto;">Installation Management</span></div>
+      <div class="complete-wrap">
+        <div class="check">✓</div>
+        <h3>Task completed</h3>
+        <p>INST-20260712-0044 has been marked as <b>Installed</b> and moved to the top of your task list.</p>
+        <button class="big-btn btn-start" style="margin-top:24px;" onclick="goTo('view-list')">Back to To-do list</button>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 7: COMPLETE (Onhold) ============ -->
+    <div class="view" id="view-onhold-complete">
+      <div class="app-bar"><span class="title" style="margin:0 auto;">Installation Management</span></div>
+      <div class="complete-wrap">
+        <div class="check" style="background:#fff3ea;color:var(--amber);">⏸</div>
+        <h3>Marked as Onhold</h3>
+        <p>INST-20260712-0044 status synced to FMS / Agency Portal. Final task status depends on remaining attempts.</p>
+        <button class="big-btn btn-start" style="margin-top:24px;" onclick="goTo('view-list')">Back to To-do list</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= SIDE EXPLANATION PANEL ================= -->
+<div class="side-panel">
+  <h3>[PDA App] Installer flow — mục 4.6</h3>
+  <div class="step"><div class="num">1</div><div><b>To-do tab</b> → chọn Installation TN được giao cho Installer, mở <b>Installation detail info</b> (6 field mặc định).</div></div>
+  <div class="step"><div class="num">2</div><div><b>Start task</b> → trigger status <b>In_Transit</b>, sync FMS/Agency Portal; hiện nút gọi buyer + 2 nút Installed / Onhold.</div></div>
+  <div class="step"><div class="num">3</div><div><b>Installed</b> → mở Proof of Installation: Photo (bắt buộc, tối đa 3), Remark (tuỳ chọn) → Confirm cập nhật <b>Installed</b> + đưa task lên đầu danh sách Completed.</div></div>
+  <div class="step"><div class="num">4</div><div><b>Onhold</b> → mở Proof of Installation Onhold: chọn lý do, Photo bắt buộc, Remark tuỳ chọn → Confirm, trạng thái cuối phụ thuộc bảng attempt/reason type/remaining attempt/tại nhà buyer hay không (Onhold, Onhold+Installation_Cancelled, hoặc Onhold+Installation_Failed).</div></div>
+  <div class="step" style="margin-bottom:0;"><div class="num">✓</div><div>Toàn bộ trạng thái đều <b>sync 2 chiều</b> với FMS và Agency Portal.</div></div>
+</div>
+
+<script>
+function goTo(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showSheet(){ document.getElementById('callSheet').classList.add('show'); }
+function hideSheet(){ document.getElementById('callSheet').classList.remove('show'); }
+</script>
+</body>
+</html>
